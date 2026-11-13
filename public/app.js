@@ -1,4 +1,3 @@
-import { AVATAR_IDS, drawAvatar, drawThumb } from "./avatar.js";
 import { Engine } from "./engine.js";
 import { scrollDelta } from "./autoscroll.js";
 import { classify } from "./gestures.js";
@@ -201,23 +200,6 @@ function pointerStep(lm, t) {
   }
 }
 
-// ---- avatar (painel da câmera)
-const AV_KEY = "jokenpo:avatar";
-let avatarId = "cam";
-try { const v = localStorage.getItem(AV_KEY); if (v === "cam" || AVATAR_IDS.includes(v)) avatarId = v; } catch {}
-const avCanvas = $("#avatar"), actx = avCanvas.getContext("2d");
-actx.imageSmoothingEnabled = false;
-document.querySelectorAll(".av canvas.avthumb").forEach((c) => drawThumb(c.getContext("2d"), c.closest(".av").dataset.avatar));
-function setAvatar(id, save = true) {
-  avatarId = id;
-  if (save) { try { localStorage.setItem(AV_KEY, id); } catch {} }
-  const on = id !== "cam";
-  avCanvas.hidden = !on;
-  $(".video-wrap").classList.toggle("avatar-mode", on);
-  document.querySelectorAll(".av").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.avatar === id)));
-}
-setAvatar(avatarId, false);
-
 function act(el) {
   const { level, act: a } = el.dataset;
   if (level) {
@@ -231,7 +213,6 @@ function act(el) {
     case "share": shareResult(); break;
     case "next": startGame(LEVEL_ORDER[LEVEL_ORDER.indexOf(g.key) + 1]); break;
     case "menu": exitGame(); break;
-    case "avatar": setAvatar(el.dataset.avatar); break;
     case "ach": openAch(); break;
     case "close": closeAch(); break;
     case "unlockall": save.all = true; persist(); renderMenu(); toast("🔓 Todos os níveis destravados"); break;
@@ -615,7 +596,6 @@ function loop() {
     drawHand(lm);
     if (needsPointer()) pointerStep(lm, t);
   }
-  if (avatarId !== "cam" && !panel.hidden) drawAvatar(actx, avatarId, t - camLabelT < 500 ? camLabel : null, t);
   if (mode === "game") gameStep(t);
   requestAnimationFrame(loop);
 }
