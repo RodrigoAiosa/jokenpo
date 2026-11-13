@@ -67,3 +67,7 @@ api/     levels.py          → função Python (Vercel)
 tests/   rps.test.mjs  progress.test.mjs  autoscroll.test.mjs
 ```
 `engine.js` (cursor por apontar/pinçar) vem do projeto [HandMouse](https://github.com/RodrigoAiosa/HandMouse).
+
+## Tela de início (estilo arcade)
+
+Visual synthwave/fliperama: sol listrado, grade em perspectiva, linhas de CRT, logo em pixel-font, seletor de lutadores e "PRESSIONE ENTER". O topo mostra seu placar (rank, XP, recorde do Survival e estrelas). A fonte *Press Start 2P* (OFL, ver `public/fonts/OFL.txt`) é hospedada no próprio projeto. Respeita `prefers-reduced-motion`.

@@ -9,11 +9,26 @@
 </head>
 <body>
   <!-- 1 · câmera -->
-  <section id="screen-start" class="screen active">
-    <h1>✊ ✋ ✌️</h1>
-    <h2>Jokenpo</h2>
-    <p class="lead">Pedra, papel e tesoura contra o computador, usando só a sua mão.</p>
-    <button id="start" class="primary">Ativar câmera e jogar</button>
+  <section id="screen-start" class="screen active arcade">
+    <div class="bg-sky"></div><div class="bg-stars"></div><div class="bg-sun"></div><div class="bg-grid"></div><div class="bg-crt"></div>
+    <div class="hiscore" aria-live="polite">
+      <span>RANK <b id="hs-rank">NOVO JOGADOR</b></span>
+      <span>XP <b id="hs-xp">000000</b></span>
+      <span>SURVIVAL <b id="hs-surv">00</b></span>
+      <span>★ <b id="hs-stars">0/9</b></span>
+    </div>
+    <div class="title-wrap">
+      <p class="eyebrow">★ GESTO ARCADE ★</p>
+      <h1 class="logo" aria-label="Jokenpo"><span>J</span><span>O</span><span>K</span><span>E</span><span>N</span><span>P</span><span>O</span></h1>
+      <p class="tag">PEDRA · PAPEL · TESOURA</p>
+    </div>
+    <div class="roster" aria-hidden="true">
+      <div class="fighter"><i>✊</i><b>PEDRA</b><small>QUEBRA TESOURA</small></div>
+      <div class="fighter"><i>✋</i><b>PAPEL</b><small>COBRE PEDRA</small></div>
+      <div class="fighter"><i>✌️</i><b>TESOURA</b><small>CORTA PAPEL</small></div>
+    </div>
+    <button id="start" class="startbtn">▶ INICIAR</button>
+    <p class="press">PRESSIONE ENTER</p>
     <p id="msg" role="status">O navegador vai pedir permissão para usar a câmera. O vídeo é processado localmente e nunca é enviado a servidor.</p>
     <button id="nocam" class="link">Continuar sem câmera (mouse e teclado)</button>
   </section>

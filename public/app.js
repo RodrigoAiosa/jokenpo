@@ -612,6 +612,7 @@ document.querySelectorAll(".level").forEach((el) =>
 // Teclado (acessibilidade / sem câmera): 1 ou R = pedra, 2 ou P = papel, 3 ou T = tesoura, Esc = sair
 const KEYS = { 1: "pedra", r: "pedra", 2: "papel", p: "papel", 3: "tesoura", t: "tesoura" };
 addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !$("#screen-start").hidden && $("#screen-start").classList.contains("active") && document.activeElement?.tagName !== "BUTTON") { e.preventDefault(); $("#start").click(); return; }
   if (!$("#ach").hidden) { if (e.key === "Escape") closeAch(); return; }
   if (mode !== "game") return;
   if (e.key === "Escape") return exitGame();
@@ -626,6 +627,15 @@ addEventListener("mousedown", () => { mousePt = null; });
 addEventListener("mouseup", (e) => { mousePt = { x: e.clientX, y: e.clientY }; });
 document.documentElement.addEventListener("mouseleave", () => { mousePt = null; });
 
+function renderStart() {
+  const r = rankFor(save.xp || 0);
+  $("#hs-rank").textContent = (save.xp || save.matches) ? String(r.name || r.title || "JOGADOR").replace(/^\P{L}+/u, "").toUpperCase() : "NOVO JOGADOR";
+  $("#hs-xp").textContent = String(save.xp || 0).padStart(6, "0");
+  $("#hs-surv").textContent = String(save.survival?.best || 0).padStart(2, "0");
+  const st = Object.values(save.stars || {}).reduce((a, b) => a + (b || 0), 0);
+  $("#hs-stars").textContent = st + "/9";
+}
+renderStart();
 setLegend("menu");
 loadLevels();
 requestAnimationFrame(loop);
