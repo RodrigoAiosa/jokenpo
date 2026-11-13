@@ -104,3 +104,14 @@ button.dwellable .dwell { height:6px; }
 
 #vl { font-size:1.7rem !important; line-height:1.55 !important; letter-spacing:.05em; }
 #survmeta { margin-bottom:10px; }
+
+/* ---- rolagem por ponteiro (lista de conquistas) ---- */
+.scrollwrap { position:relative; }
+#achlist { scrollbar-color:#4a5f93 #0f182b; scrollbar-width:auto; }
+.rail { position:absolute; right:0; top:0; bottom:0; width:56px; pointer-events:none; display:flex; flex-direction:column;
+  justify-content:space-between; align-items:center; padding:10px 0; border-radius:0 12px 12px 0; color:#7fa6ff99; font-size:20px;
+  background:linear-gradient(90deg,transparent,#5b8cff12); transition:background .15s; }
+.rail span { transition:transform .15s, color .15s, text-shadow .15s; }
+.rail.up { background:linear-gradient(180deg,#5b8cff55,transparent 55%); }
+.rail.down { background:linear-gradient(0deg,#5b8cff55,transparent 55%); }
+.rail.up span:first-child, .rail.down span:last-child { color:#fff; text-shadow:0 0 14px #5b8cff; transform:scale(1.5); }

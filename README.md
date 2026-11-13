@@ -30,6 +30,7 @@ O **placar** mostra vitórias, empates e derrotas da partida, a sequência de vi
 - **XP e títulos:** cada rodada rende XP (níveis mais difíceis valem mais; vitórias seguidas dão bônus). Títulos: 🌱 Novato → 🥋 Praticante → ⚔️ Guerreiro → 🧘 Sensei → 🏯 Samurai.
 - **11 conquistas** 🏆, como *Em chamas* (5 vitórias seguidas), *Virada* (vencer depois de perder por 0×2) e *Lenda* (vencer o Mestre por 3×0).
 - No fim da partida, os botões também se escolhem **apontando e segurando**.
+- Na lista de conquistas, **aponte para a faixa à direita** (onde fica a barra de rolagem): na metade de cima a lista sobe, na metade de baixo desce, e quanto mais perto da ponta, mais rápido. No meio ela para. Funciona com a mão e com o mouse.
 
 ## ♾️ Modo Sobrevivência
 Quanto mais você vence, mais difícil fica:
@@ -56,13 +57,13 @@ Rodar local: `python3 -m http.server -d public` (a câmera funciona em `localhos
 
 ## Testes
 ```bash
-npm test      # regras, gestos, IA dos 3 níveis, progressão e sobrevivência (Node, sem dependências)
+npm test      # regras, gestos, IA dos 3 níveis, progressão, sobrevivência e rolagem por ponteiro (Node, sem dependências)
 ```
 
 ## Estrutura
 ```
-public/  index.html  style.css  app.js  gestures.js  cpu.js  progress.js  engine.js
+public/  index.html  style.css  app.js  gestures.js  cpu.js  progress.js  autoscroll.js  engine.js
 api/     levels.py          → função Python (Vercel)
-tests/   rps.test.mjs  progress.test.mjs
+tests/   rps.test.mjs  progress.test.mjs  autoscroll.test.mjs
 ```
 `engine.js` (cursor por apontar/pinçar) vem do projeto [HandMouse](https://github.com/RodrigoAiosa/HandMouse).

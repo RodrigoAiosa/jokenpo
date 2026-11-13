@@ -1,4 +1,5 @@
 import { Engine } from "./engine.js";
+import { scrollDelta } from "./autoscroll.js";
 import { classify } from "./gestures.js";
 import { Cpu, judge, EMOJI, LABEL, VERB, BEATS, LEVEL_DEFAULTS } from "./cpu.js";
 import {
@@ -29,6 +30,7 @@ let landmarker = null, stream = null, camOn = false, lastVT = -1;
 let camLabel = null, camLabelT = 0, keyLabel = null;
 let dwellEl = null, dwellStart = 0, pointerSince = 0;
 let g = null;                              // estado da partida
+let camPt = null, mousePt = null, lastFrame = 0, scrollAcc = 0;   // ponteiros para a rolagem por faixa
 let save = loadSave();
 
 function newEngine() { return new Engine({ fist_hold: 1e9 }); }   // sem pausa por punho aqui
@@ -187,6 +189,7 @@ function pointerStep(lm, t) {
   }
   $("#status").textContent = (mode === "menu" ? "MENU" : "FIM") + " | " + info.mode;
   const [x, y] = px(engine.cursor);
+  camPt = info.mode === "CURSOR" || info.mode === "PINCA" ? { x, y } : null;
   const el = t - pointerSince > 700 && info.mode === "CURSOR" ? document.elementFromPoint(x, y)?.closest(".dwellable") : null;
   if (el !== dwellEl) { clearDwell(); dwellEl = el; dwellStart = t; el?.classList.add("hot"); }
   if (dwellEl) {
@@ -223,6 +226,7 @@ function openAch() {
   }).join("");
   engine = newEngine(); clearDwell(); pointerSince = performance.now();
   $("#ach").hidden = false;
+  $("#achlist").scrollTop = 0; scrollAcc = 0;   // só funciona depois de exibido
 }
 function closeAch() { $("#ach").hidden = true; clearDwell(); pointerSince = performance.now(); }
 
@@ -565,8 +569,24 @@ function drawHand(lm) {
   for (const [x, y] of lm) { octx.beginPath(); octx.arc(x * overlay.width, y * overlay.height, 3, 0, 7); octx.fill(); }
 }
 
+/** Rola a lista de conquistas quando o ponteiro (mão ou mouse) está na faixa da barra de rolagem. */
+function autoScroll(t) {
+  const dt = Math.min(0.1, (t - lastFrame) / 1000);
+  lastFrame = t;
+  if ($("#ach").hidden) { scrollAcc = 0; return; }
+  const list = $("#achlist"), rail = $("#ach .rail");
+  const p = camPt ?? mousePt;
+  const d = p ? scrollDelta(list.getBoundingClientRect(), p.x, p.y, dt) : 0;
+  rail.classList.toggle("up", d < 0);
+  rail.classList.toggle("down", d > 0);
+  scrollAcc += d;
+  const whole = Math.trunc(scrollAcc);       // scrollTop só aceita pixels inteiros em alguns navegadores
+  if (whole) { list.scrollTop += whole; scrollAcc -= whole; }
+}
+
 function loop() {
   const t = performance.now();
+  autoScroll(t);
   if (camOn && video.readyState >= 2 && video.currentTime !== lastVT) {
     lastVT = video.currentTime;
     const res = landmarker.detectForVideo(video, t);
@@ -600,6 +620,11 @@ addEventListener("keydown", (e) => {
   if (lab) keyLabel = { label: lab, until: performance.now() + 800 * SPEED };
 });
 addEventListener("pagehide", stopCamera);
+// Mouse: só rola ao "pairar" na faixa; se estiver arrastando a barra nativa (botão apertado), não interfere.
+addEventListener("mousemove", (e) => { mousePt = e.buttons ? null : { x: e.clientX, y: e.clientY }; });
+addEventListener("mousedown", () => { mousePt = null; });
+addEventListener("mouseup", (e) => { mousePt = { x: e.clientX, y: e.clientY }; });
+document.documentElement.addEventListener("mouseleave", () => { mousePt = null; });
 
 setLegend("menu");
 loadLevels();
