@@ -1,6 +1,7 @@
 // node tests/progress.test.mjs
 import assert from "node:assert/strict";
-import { starsFor, unlockedLevels, roundXp, matchXp, rankFor, newAchievements, defaultSave, ACHIEVEMENTS } from "../public/progress.js";
+import { starsFor, unlockedLevels, roundXp, matchXp, rankFor, newAchievements, defaultSave, ACHIEVEMENTS,
+  survivalParams, livesAfterWin, SURVIVAL_LIVES } from "../public/progress.js";
 
 // estrelas
 assert.equal(starsFor(3, 0), 3);
@@ -54,5 +55,28 @@ assert.ok(newAchievements(s, { type: "match", won: false, myW: 0, oppW: 3, level
 s.ach.champion = 1;
 assert.ok(!newAchievements(s, { type: "match", won: true, myW: 3, oppW: 0, level: "aprendiz" }).includes("champion"));
 assert.equal(new Set(ACHIEVEMENTS.map((a) => a.id)).size, ACHIEVEMENTS.length);
+
+// ---------- modo Sobrevivência
+assert.equal(SURVIVAL_LIVES, 3);
+assert.deepEqual(survivalParams(0), { stage: 0, strategy: "random", p: 0, beat: 900 });
+assert.equal(survivalParams(2).strategy, "random");
+assert.deepEqual([survivalParams(3).stage, survivalParams(3).strategy], [1, "freq"]);
+assert.deepEqual([survivalParams(6).stage, survivalParams(6).strategy], [1, "freq"]);
+assert.deepEqual([survivalParams(7).stage, survivalParams(7).strategy, survivalParams(7).p], [2, "markov", 0.85]);
+assert.equal(survivalParams(5).beat, 700);
+assert.equal(survivalParams(13).beat, 380);
+assert.equal(survivalParams(99).beat, 380);                       // piso
+for (let w = 1; w < 40; w++) assert.ok(survivalParams(w).beat <= survivalParams(w - 1).beat);   // nunca desacelera
+assert.equal(livesAfterWin(3, 4), 3);
+assert.equal(livesAfterWin(3, 5), 4);
+assert.equal(livesAfterWin(5, 10), 5);                            // teto de 5 vidas
+assert.equal(livesAfterWin(1, 10), 2);
+assert.equal(livesAfterWin(3, 0), 3);
+assert.deepEqual(defaultSave().survival, { best: 0, runs: 0 });
+s = defaultSave();
+assert.deepEqual(newAchievements(s, { type: "survival", wins: 9 }), []);
+assert.deepEqual(newAchievements(s, { type: "survival", wins: 10 }), ["survivor"]);
+assert.deepEqual(newAchievements(s, { type: "survival", wins: 25 }).sort(), ["survivor", "unstoppable"]);
+assert.equal(ACHIEVEMENTS.length, 11);
 
 console.log("progress.js OK");

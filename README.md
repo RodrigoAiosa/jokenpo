@@ -28,8 +28,18 @@ O **placar** mostra vitórias, empates e derrotas da partida, a sequência de vi
 - **Estrelas por nível:** ⭐ vencer 3×2 · ⭐⭐ vencer 3×1 · ⭐⭐⭐ vencer 3×0. Fica a melhor de cada nível.
 - **Desbloqueio:** o Aprendiz começa aberto; vencer uma partida abre o Jovem, e vencer no Jovem abre o Mestre. (Há um link *Destravar todos os níveis* no menu.)
 - **XP e títulos:** cada rodada rende XP (níveis mais difíceis valem mais; vitórias seguidas dão bônus). Títulos: 🌱 Novato → 🥋 Praticante → ⚔️ Guerreiro → 🧘 Sensei → 🏯 Samurai.
-- **9 conquistas** 🏆, como *Em chamas* (5 vitórias seguidas), *Virada* (vencer depois de perder por 0×2) e *Lenda* (vencer o Mestre por 3×0).
+- **11 conquistas** 🏆, como *Em chamas* (5 vitórias seguidas), *Virada* (vencer depois de perder por 0×2) e *Lenda* (vencer o Mestre por 3×0).
 - No fim da partida, os botões também se escolhem **apontando e segurando**.
+
+## ♾️ Modo Sobrevivência
+Quanto mais você vence, mais difícil fica:
+- **3 vidas** (❤️ a mais a cada 5 vitórias, no máximo 5). Perder uma rodada custa uma vida; empate não.
+- **A contagem encurta** 40 ms a cada vitória (de 0,90 s até 0,38 s).
+- **O computador evolui:** 0–2 vitórias joga aleatório · 3–6 conta as suas jogadas · 7+ lê padrões de sequência.
+- O resultado é o número de vitórias, com recorde salvo. Conquistas *Sobrevivente* (10) e *Imparável* (20).
+
+## 📤 Compartilhar o placar
+Ao fim de uma partida ou sobrevivência, **Compartilhar** gera uma imagem 1200×630 com o resultado, as estrelas, seu título e o endereço do jogo. No celular abre a janela de compartilhar do sistema; no computador (ou ao escolher o botão com a mão) a imagem é baixada, pronta para postar.
 
 Tudo fica salvo no navegador (`localStorage`); limpar os dados do site zera o progresso.
 
@@ -46,7 +56,7 @@ Rodar local: `python3 -m http.server -d public` (a câmera funciona em `localhos
 
 ## Testes
 ```bash
-npm test      # regras, gestos, IA dos 3 níveis e progressão (Node, sem dependências)
+npm test      # regras, gestos, IA dos 3 níveis, progressão e sobrevivência (Node, sem dependências)
 ```
 
 ## Estrutura

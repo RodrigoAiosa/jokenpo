@@ -46,9 +46,10 @@
         <div class="dwell"><span></span></div>
       </article>
     </div>
-    <p class="rule">Partidas melhor de 5: vence quem fizer 3 rodadas. ⭐ 3×2 · ⭐⭐ 3×1 · ⭐⭐⭐ 3×0. Vença para liberar o próximo nível.</p>
+    <p class="rule">Partidas melhor de 5: vence quem fizer 3 rodadas. ⭐ 3×2 · ⭐⭐ 3×1 · ⭐⭐⭐ 3×0. Vença para liberar o próximo nível.<br>♾️ <b>Sobrevivência</b>: 3 vidas, a contagem encurta e o computador fica mais esperto a cada vitória.</p>
     <div class="menubtns">
-      <button class="dwellable" data-act="ach">🏆 Conquistas <b id="achcount">0/9</b><span class="dwell"><span></span></span></button>
+      <button class="dwellable" data-act="survival">♾️ Sobrevivência <b id="survbest">novo</b><span class="dwell"><span></span></span></button>
+      <button class="dwellable" data-act="ach">🏆 Conquistas <b id="achcount">0/11</b><span class="dwell"><span></span></span></button>
       <button id="unlockall" class="link" data-act="unlockall">Destravar todos os níveis</button>
     </div>
   </section>
@@ -60,12 +61,19 @@
       <button class="small" data-act="menu">Sair (👍)</button>
     </header>
 
-    <div class="scoreboard" aria-label="Placar">
+    <div class="scoreboard" id="board" aria-label="Placar">
       <div class="score you"><span id="sw">0</span><label>Você</label></div>
       <div class="score draw"><span id="sd">0</span><label>Empates</label></div>
       <div class="score cpu"><span id="sl">0</span><label>Computador</label></div>
     </div>
-    <div class="meta">Melhor de 5 · primeiro a <b>3</b> · Rodada <b id="round">0</b> · Sequência <b id="streak">0</b> · Recorde <b id="best">0</b></div>
+    <div class="meta" id="meta">Melhor de 5 · primeiro a <b>3</b> · Rodada <b id="round">0</b> · Sequência <b id="streak">0</b> · Recorde <b id="best">0</b></div>
+
+    <div class="scoreboard" id="survboard" aria-label="Placar da sobrevivência" hidden>
+      <div class="score you"><span id="vw">0</span><label>Vitórias</label></div>
+      <div class="score draw"><span id="vl">❤️❤️❤️</span><label>Vidas</label></div>
+      <div class="score cpu"><span id="vb">0</span><label>Recorde</label></div>
+    </div>
+    <div class="meta" id="survmeta" hidden>Contagem <b id="vbeat">0,90 s</b> · Computador: <b id="vai">Aprendiz</b> · +1 vida a cada 5 vitórias</div>
 
     <div class="arena">
       <div class="side" id="youBox"><div class="hand" id="youHand">❔</div><label>Você</label></div>
@@ -93,6 +101,7 @@
       <div class="actions">
         <button class="dwellable" data-act="retry">🔁 Jogar de novo<span class="dwell"><span></span></span></button>
         <button class="dwellable" id="nextbtn" data-act="next">➡️ Próximo nível<span class="dwell"><span></span></span></button>
+        <button class="dwellable" data-act="share">📤 Compartilhar<span class="dwell"><span></span></span></button>
         <button class="dwellable" data-act="menu">📋 Menu<span class="dwell"><span></span></span></button>
       </div>
       <p class="hint">Aponte e segure sobre um botão · 👍 ou Esc volta ao menu</p>

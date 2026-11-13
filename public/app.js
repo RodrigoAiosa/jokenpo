@@ -3,7 +3,7 @@ import { classify } from "./gestures.js";
 import { Cpu, judge, EMOJI, LABEL, VERB, BEATS, LEVEL_DEFAULTS } from "./cpu.js";
 import {
   LEVEL_ORDER, WIN_TARGET, defaultSave, starsFor, unlockedLevels, roundXp, matchXp,
-  rankFor, ACHIEVEMENTS, newAchievements,
+  rankFor, ACHIEVEMENTS, newAchievements, survivalParams, livesAfterWin, SURVIVAL_LIVES,
 } from "./progress.js";
 
 const VISION = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
@@ -39,7 +39,8 @@ function loadSave() {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY) || "null");
     if (s && typeof s === "object") {
       const d = defaultSave();
-      return { ...d, ...s, stars: { ...d.stars, ...s.stars }, best: { ...d.best, ...s.best }, ach: { ...s.ach } };
+      return { ...d, ...s, stars: { ...d.stars, ...s.stars }, best: { ...d.best, ...s.best }, ach: { ...s.ach },
+        survival: { ...d.survival, ...s.survival } };
     }
   } catch { /* usa o padrão */ }
   return defaultSave();
@@ -153,6 +154,7 @@ function renderMenu() {
   });
   $("#achcount").textContent = `${Object.keys(save.ach).length}/${ACHIEVEMENTS.length}`;
   $("#unlockall").hidden = open.length === LEVEL_ORDER.length;
+  $("#survbest").textContent = save.survival.best ? `recorde ${save.survival.best}` : "novo";
 }
 
 function goMenu() {
@@ -202,7 +204,9 @@ function act(el) {
     return;
   }
   switch (a) {
-    case "retry": startGame(g.key); break;
+    case "retry": g.mode === "survival" ? startSurvival() : startGame(g.key); break;
+    case "survival": startSurvival(); break;
+    case "share": shareResult(); break;
     case "next": startGame(LEVEL_ORDER[LEVEL_ORDER.indexOf(g.key) + 1]); break;
     case "menu": exitGame(); break;
     case "ach": openAch(); break;
@@ -235,7 +239,7 @@ function grant(ids) {
 function startGame(levelKey) {
   const lv = LEVELS[levelKey];
   g = {
-    key: levelKey, lv, cpu: new Cpu({ strategy: lv.strategy, p: lv.p }),
+    mode: "match", key: levelKey, lv, beat: lv.beat, cpu: new Cpu({ strategy: lv.strategy, p: lv.p }),
     w: 0, d: 0, l: 0, round: 0, streak: 0, best: save.best[levelKey] || 0, trailed: false,
     state: "ready", t0: performance.now(), cpuMove: null, labels: [], joiaSince: null, joiaSeen: 0,
   };
@@ -252,6 +256,15 @@ function startGame(levelKey) {
 function exitGame() { g = null; $("#end").hidden = true; goMenu(); }
 
 function renderScore() {
+  const sv = g.mode === "survival";
+  $("#board").hidden = sv; $("#meta").hidden = sv; $("#survboard").hidden = !sv; $("#survmeta").hidden = !sv;
+  if (sv) {
+    $("#vw").textContent = g.w; $("#vb").textContent = g.best;
+    $("#vl").textContent = g.lives > 0 ? "❤️".repeat(g.lives) : "💀";
+    $("#vbeat").textContent = (g.beat / 1000).toFixed(2).replace(".", ",") + " s";
+    $("#vai").textContent = levelName(LEVEL_ORDER[g.stageIdx || 0]);
+    return;
+  }
   $("#sw").textContent = g.w; $("#sd").textContent = g.d; $("#sl").textContent = g.l;
   $("#round").textContent = g.round; $("#streak").textContent = g.streak; $("#best").textContent = g.best;
 }
@@ -271,6 +284,11 @@ function currentLabel(t) {
 }
 
 function startRound(t) {
+  if (g.mode === "survival") {            // a dificuldade sobe com as vitórias
+    const sp = survivalParams(g.w);
+    g.cpu.strategy = sp.strategy; g.cpu.p = sp.p; g.beat = sp.beat; g.stageIdx = sp.stage;
+    renderScore();
+  }
   g.cpuMove = g.cpu.pick();            // decidido ANTES da contagem, só com o histórico
   g.state = "count"; g.t0 = t;
   setWinner(null);
@@ -285,7 +303,8 @@ function majority(from, to) {
 }
 
 function finishRound(user) {
-  const cpu = g.cpuMove, r = judge(user, cpu), lvIdx = LEVEL_ORDER.indexOf(g.key);
+  const cpu = g.cpuMove, r = judge(user, cpu);
+  const lvIdx = g.mode === "survival" ? g.stageIdx : LEVEL_ORDER.indexOf(g.key);
   g.round++;
   if (r === "vitoria") { g.w++; g.streak++; bump(".score.you"); }
   else if (r === "derrota") { g.l++; g.streak = 0; bump(".score.cpu"); }
@@ -293,6 +312,16 @@ function finishRound(user) {
   if (g.w === 0 && g.l === 2) g.trailed = true;
   if (g.streak > (save.best[g.key] || 0)) save.best[g.key] = g.streak;
   g.best = save.best[g.key] || 0;
+  if (g.mode === "survival") {
+    if (r === "derrota") g.lives--;
+    else if (r === "vitoria") {
+      const nl = livesAfterWin(g.lives, g.w);
+      if (nl > g.lives) toast("❤️ +1 vida!");
+      g.lives = nl;
+    }
+    if (g.w > save.survival.best) save.survival.best = g.w;
+    g.best = save.survival.best;
+  }
   const xp = roundXp(r, g.streak, lvIdx);
   save.xp += xp;
   g.cpu.record(user, cpu);
@@ -341,11 +370,138 @@ function endMatch() {
   const next = LEVEL_ORDER[lvIdx + 1];
   $("#nextbtn").hidden = !(won && next && after.open.includes(next));
 
+  g.share = {
+    tone: won ? "win" : "lose",
+    title: won ? `Venci o ${levelName(g.key)}!` : `O ${levelName(g.key)} me venceu`,
+    big: `${g.w} × ${g.l}`,
+    line: won ? "⭐".repeat(stars) + "☆".repeat(3 - stars) : "Vou tentar de novo 💪",
+  };
+  $("#endnew").dataset.kind = "match";
+  openEnd();
+}
+
+function openEnd() {
   g.state = "end";
   $("#end").hidden = false;
   engine = newEngine(); clearDwell(); pointerSince = performance.now();
   setLegend("game");
   syncCursor();
+}
+
+// ---------------------------------------------------------------- modo Sobrevivência
+function startSurvival() {
+  const lv = { name: "Sobrevivência", icon: "♾️", beat: 900 };
+  g = {
+    mode: "survival", key: "survival", lv, beat: 900, stageIdx: 0,
+    cpu: new Cpu({ strategy: "random", p: 0 }),
+    w: 0, d: 0, l: 0, lives: SURVIVAL_LIVES, round: 0, streak: 0,
+    best: save.survival.best, startBest: save.survival.best, trailed: false,
+    state: "ready", t0: performance.now(), cpuMove: null, labels: [], joiaSince: null, joiaSeen: 0,
+  };
+  $("#end").hidden = true; $("#ach").hidden = true;
+  $("#levelname").textContent = `${lv.icon} ${lv.name}`;
+  $("#history").innerHTML = "";
+  $("#result").textContent = "\u00a0"; $("#result").className = "result";
+  setHands("❔", "❔"); setWinner(null);
+  clearDwell();
+  renderScore();
+  show("game");
+}
+
+function endSurvival() {
+  const wins = g.w, record = wins > g.startBest;
+  save.survival.runs++;
+  const gain = 5 * wins;
+  save.xp += gain;
+  const before = rankFor(save.xp - gain).index;
+  const ach = grant(newAchievements(save, { type: "survival", wins }));
+  persist();
+  const after = rankFor(save.xp);
+
+  $("#endtitle").textContent = "💀 Fim da sobrevivência";
+  $("#endscore").textContent = `${wins} ${wins === 1 ? "vitória" : "vitórias"}`;
+  $("#endstars").textContent = record ? "🏅 Novo recorde!" : `Recorde: ${save.survival.best}`;
+  $("#endxp").textContent = `+${gain} XP`;
+  const lines = [];
+  if (after.index > before) lines.push(`🎖️ Novo título: <b>${after.title}</b>!`);
+  for (const id of ach) { const a = ACHIEVEMENTS.find((x) => x.id === id); lines.push(`${a.icon} Conquista: <b>${a.name}</b>`); }
+  $("#endnew").innerHTML = lines.map((l) => `<div>${l}</div>`).join("");
+  $("#nextbtn").hidden = true;
+  g.share = {
+    tone: "blue", title: "Modo Sobrevivência",
+    big: `${wins} ${wins === 1 ? "vitória" : "vitórias"}`,
+    line: record ? "🏅 Novo recorde!" : `Recorde: ${save.survival.best}`,
+  };
+  openEnd();
+}
+
+// ---------------------------------------------------------------- compartilhar o placar
+function roundRect(x, px, py, w, h, r) {
+  x.beginPath();
+  x.moveTo(px + r, py); x.arcTo(px + w, py, px + w, py + h, r); x.arcTo(px + w, py + h, px, py + h, r);
+  x.arcTo(px, py + h, px, py, r); x.arcTo(px, py, px + w, py, r); x.closePath();
+}
+
+/** Desenha a imagem do placar (1200×630) num canvas. */
+function drawShare(d) {
+  const W = 1200, H = 630, c = document.createElement("canvas");
+  c.width = W; c.height = H;
+  const x = c.getContext("2d");
+  const font = (w, sz) => `${w} ${sz}px system-ui, "Segoe UI", "Noto Sans", sans-serif`;
+  const fit = (text, w, sz, maxW) => { while (sz > 22) { x.font = font(w, sz); if (x.measureText(text).width <= maxW) break; sz -= 2; } x.font = font(w, sz); };
+  const bg = x.createRadialGradient(930, 250, 40, 930, 250, 820);
+  bg.addColorStop(0, "#24387a"); bg.addColorStop(1, "#0e1322");
+  x.fillStyle = bg; x.fillRect(0, 0, W, H);
+  x.textBaseline = "alphabetic";
+
+  roundRect(x, 60, 52, 480, 46, 23);
+  x.fillStyle = "#5b8cff22"; x.fill(); x.strokeStyle = "#5b8cff"; x.lineWidth = 2; x.stroke();
+  x.fillStyle = "#9fbcff"; x.font = font(600, 20); x.fillText("JOKENPO · JOGADO COM A MÃO", 84, 83);
+
+  x.fillStyle = "#ffffff"; fit(d.title, 800, 66, 680); x.fillText(d.title, 60, 190);
+  x.fillStyle = d.tone === "win" ? "#3ddc84" : d.tone === "lose" ? "#ff6b5e" : "#7fa6ff";
+  fit(d.big, 800, 150, 680); x.fillText(d.big, 60, 340);
+  x.fillStyle = "#ffb02e"; fit(d.line, 700, 58, 680); x.fillText(d.line, 60, 430);
+  const r = rankFor(save.xp);
+  x.fillStyle = "#b8c4dc"; fit(`${r.icon} ${r.title} · ${save.xp} XP`, 500, 32, 680); x.fillText(`${r.icon} ${r.title} · ${save.xp} XP`, 60, 500);
+
+  x.fillStyle = "#7e8db0"; x.font = font(500, 28);
+  const ask = "Consegue me vencer?  ";
+  x.fillText(ask, 60, 580);
+  const askW = x.measureText(ask).width;
+  x.fillStyle = "#ffffff"; x.font = font(700, 28); x.fillText(location.host, 60 + askW, 580);
+
+  [["✊", 770, 150, -8, 190], ["✌️", 960, 175, 8, 190], ["✋", 850, 105, 0, 215]].forEach(([e, px, py, rot, sz], i) => {
+    x.save(); x.translate(px + sz / 2, py + sz * 0.6); x.rotate((rot * Math.PI) / 180);
+    roundRect(x, -sz / 2, -sz * 0.6, sz, sz * 1.2, 30);
+    x.fillStyle = "#172036"; x.fill(); x.strokeStyle = i === 2 ? "#5b8cff" : "#2b3a5c"; x.lineWidth = 3; x.stroke();
+    x.font = `${Math.round(sz * 0.55)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
+    x.textAlign = "center"; x.textBaseline = "middle"; x.fillStyle = "#fff"; x.fillText(e, 0, 4);
+    x.restore();
+  });
+  return c;
+}
+
+function downloadBlob(blob) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "jokenpo-placar.png";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+async function shareResult() {
+  const d = g?.share;
+  if (!d) return;
+  const blob = await new Promise((res) => drawShare(d).toBlob(res, "image/png"));
+  const file = new File([blob], "jokenpo-placar.png", { type: "image/png" });
+  const text = `Joguei Jokenpo só com a mão! ${d.title} ${d.big}. Consegue me vencer? ${location.origin}`;
+  // A janela de compartilhar exige um toque/clique real; por gesto da mão, cai para o download.
+  if (navigator.userActivation?.isActive && navigator.canShare?.({ files: [file] })) {
+    try { await navigator.share({ files: [file], text, url: location.origin }); return; }
+    catch (e) { if (e?.name === "AbortError") return; }
+  }
+  downloadBlob(blob);
+  toast("📥 Imagem salva. É só postar!");
 }
 
 function gameStep(t) {
@@ -367,7 +523,7 @@ function gameStep(t) {
     g.joiaSince = null; $("#exitbar").style.width = "0";
   }
 
-  const beat = g.lv.beat * SPEED;
+  const beat = g.beat * SPEED;
   if (g.state === "ready") {
     $("#count").textContent = "Prepare-se…";
     if (t - g.t0 > 1500 * SPEED) startRound(t);
@@ -387,7 +543,10 @@ function gameStep(t) {
       g.state = "show"; g.tShow = t;
     }
   } else if (g.state === "show") {
-    if (t - g.tShow > SHOW_MS) { if (g.w >= WIN_TARGET || g.l >= WIN_TARGET) endMatch(); else startRound(t); }
+    if (t - g.tShow > SHOW_MS) {
+      const over = g.mode === "survival" ? g.lives <= 0 : g.w >= WIN_TARGET || g.l >= WIN_TARGET;
+      if (!over) startRound(t); else if (g.mode === "survival") endSurvival(); else endMatch();
+    }
   }
 }
 

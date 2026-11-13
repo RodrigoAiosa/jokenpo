@@ -1,5 +1,6 @@
 :root { --bg:#0e1322; --card:#172036; --ink:#eaf0fb; --mute:#9aa8c2; --acc:#5b8cff; --ok:#3ddc84; --bad:#ff6b5e; --warn:#ffb02e; }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { height: 100%; }
 body { margin:0; font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif; background:radial-gradient(1200px 600px at 50% -10%, #1b2a55 0%, var(--bg) 60%); color:var(--ink); }
 h1 { font-size:4rem; margin:0; letter-spacing:.1em; }
@@ -100,3 +101,6 @@ button.dwellable .dwell { height:6px; }
 #achlist small { display:block; color:var(--mute); }
 #toast { position:fixed; left:50%; top:18px; transform:translate(-50%,-140%); background:#1d3a2c; border:2px solid var(--ok); color:#eaffef; padding:10px 20px; border-radius:14px; font-weight:700; z-index:3000; transition:transform .35s; max-width:92vw; text-align:center; }
 #toast.show { transform:translate(-50%,0); }
+
+#vl { font-size:1.7rem !important; line-height:1.55 !important; letter-spacing:.05em; }
+#survmeta { margin-bottom:10px; }

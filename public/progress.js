@@ -3,6 +3,8 @@
 
 export const LEVEL_ORDER = ["aprendiz", "jovem", "mestre"];
 export const WIN_TARGET = 3;   // melhor de 5: vence quem fizer 3 rodadas
+export const SURVIVAL_LIVES = 3;
+export const SURVIVAL_MAX_LIVES = 5;
 
 export const defaultSave = () => ({
   stars: { aprendiz: 0, jovem: 0, mestre: 0 },
@@ -11,6 +13,7 @@ export const defaultSave = () => ({
   matches: 0,
   ach: {},          // id -> timestamp
   all: false,       // "destravar todos os níveis"
+  survival: { best: 0, runs: 0 },   // modo Sobrevivência: recorde de vitórias e nº de tentativas
 });
 
 /** ⭐ por partida vencida: 3 = 3×0, 2 = 3×1, 1 = 3×2. Empates não contam. */
@@ -27,6 +30,24 @@ export function unlockedLevels(save) {
     if ((save.stars[LEVEL_ORDER[i - 1]] || 0) > 0) out.push(LEVEL_ORDER[i]); else break;
   }
   return out;
+}
+
+/**
+ * Modo Sobrevivência: quanto mais você vence, mais rápida a contagem e mais esperto o computador.
+ *   0–2 vitórias → aleatório · 3–6 → conta suas jogadas · 7+ → lê padrões de sequência
+ * A contagem começa em 900 ms e encurta 40 ms por vitória, até o piso de 380 ms.
+ * `stage` (0/1/2) equivale a Aprendiz/Jovem/Mestre (usado no XP e no rótulo da IA).
+ */
+export function survivalParams(wins) {
+  const beat = Math.max(380, 900 - 40 * wins);
+  if (wins < 3) return { stage: 0, strategy: "random", p: 0, beat };
+  if (wins < 7) return { stage: 1, strategy: "freq", p: 0.5, beat };
+  return { stage: 2, strategy: "markov", p: 0.85, beat };
+}
+
+/** +1 vida a cada 5 vitórias, até o máximo de 5. */
+export function livesAfterWin(lives, wins) {
+  return wins > 0 && wins % 5 === 0 && lives < SURVIVAL_MAX_LIVES ? lives + 1 : lives;
 }
 
 /** XP de uma rodada: níveis mais difíceis valem mais; sequência de vitórias dá bônus (até +100%). */
@@ -57,7 +78,7 @@ export function rankFor(xp) {
   return { index: i, title: RANKS[i].title, icon: RANKS[i].icon, next, pct: next === null ? 1 : (xp - cur) / (next - cur) };
 }
 
-// ev: { type:'round', result, streak, level }  |  { type:'match', won, myW, oppW, level, comeback }
+// ev: { type:'round', result, streak, level } | { type:'match', won, myW, oppW, level, comeback } | { type:'survival', wins }
 export const ACHIEVEMENTS = [
   { id: "first_win", icon: "🎯", name: "Primeira vitória", desc: "Vença uma rodada.",
     test: (e) => e.type === "round" && e.result === "vitoria" },
@@ -77,6 +98,10 @@ export const ACHIEVEMENTS = [
     test: (e) => e.type === "match" && e.won && e.level === "mestre" && e.oppW === 0 },
   { id: "veteran", icon: "🎖️", name: "Veterano", desc: "Jogue 10 partidas.",
     test: (e, s) => e.type === "match" && s.matches >= 10 },
+  { id: "survivor", icon: "♾️", name: "Sobrevivente", desc: "Vença 10 rodadas numa sobrevivência.",
+    test: (e) => e.type === "survival" && e.wins >= 10 },
+  { id: "unstoppable", icon: "🚀", name: "Imparável", desc: "Vença 20 rodadas numa sobrevivência.",
+    test: (e) => e.type === "survival" && e.wins >= 20 },
 ];
 
 /** Ids das conquistas que o evento acabou de desbloquear (o chamador grava em save.ach). */
