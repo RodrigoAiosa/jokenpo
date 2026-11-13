@@ -71,3 +71,7 @@ tests/   rps.test.mjs  progress.test.mjs  autoscroll.test.mjs
 ## Visual arcade (todas as telas)
 
 Visual synthwave/fliperama: sol listrado, grade em perspectiva, linhas de CRT, logo em pixel-font, seletor de lutadores e "PRESSIONE ENTER". O topo mostra seu placar (rank, XP, recorde do Survival e estrelas). A fonte *Press Start 2P* (OFL, ver `public/fonts/OFL.txt`) é hospedada no próprio projeto. Respeita `prefers-reduced-motion`.
+
+## Avatares
+
+No painel da câmera (canto inferior direito) dá para trocar a imagem por um personagem pixel art: Robô, Ninja, Alien ou Gato. O avatar mostra a mão do gesto detectado (pedra, papel ou tesoura). A câmera continua funcionando por trás; a escolha fica salva no navegador. Escolha com o mouse ou apontando e segurando sobre o botão.

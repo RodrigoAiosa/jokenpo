@@ -142,9 +142,17 @@
 
   <aside id="panel" hidden>
     <div class="status" id="status">—</div>
+    <div class="avatarpick" role="group" aria-label="Imagem do jogador">
+      <button class="dwellable av" data-act="avatar" data-avatar="cam" aria-pressed="true" title="Usar a câmera"><span class="avthumb">📷</span><em>CÂMERA</em><span class="dwell"><span></span></span></button>
+      <button class="dwellable av" data-act="avatar" data-avatar="robo" aria-pressed="false" title="Robô"><canvas class="avthumb" width="16" height="16"></canvas><em>ROBÔ</em><span class="dwell"><span></span></span></button>
+      <button class="dwellable av" data-act="avatar" data-avatar="ninja" aria-pressed="false" title="Ninja"><canvas class="avthumb" width="16" height="16"></canvas><em>NINJA</em><span class="dwell"><span></span></span></button>
+      <button class="dwellable av" data-act="avatar" data-avatar="alien" aria-pressed="false" title="Alien"><canvas class="avthumb" width="16" height="16"></canvas><em>ALIEN</em><span class="dwell"><span></span></span></button>
+      <button class="dwellable av" data-act="avatar" data-avatar="gato" aria-pressed="false" title="Gato"><canvas class="avthumb" width="16" height="16"></canvas><em>GATO</em><span class="dwell"><span></span></span></button>
+    </div>
     <div class="video-wrap">
       <video id="video" playsinline muted></video>
       <canvas id="overlay" width="640" height="480"></canvas>
+      <canvas id="avatar" width="128" height="96" hidden></canvas>
     </div>
     <div class="detected">Detectado: <b id="detected">—</b></div>
     <table id="legend"></table>
