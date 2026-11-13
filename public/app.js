@@ -55,6 +55,7 @@ function syncCursor() { cursorEl.hidden = !(camOn && needsPointer()); }
 
 function show(name) {
   mode = name;
+  document.body.dataset.screen = name;
   document.querySelectorAll(".screen").forEach((s) => s.classList.toggle("active", s.id === "screen-" + name));
   panel.hidden = !camOn || name === "start";
   setLegend(name);

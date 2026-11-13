@@ -7,10 +7,10 @@
   <meta name="description" content="Pedra, papel e tesoura contra o computador usando a webcam. Vença partidas, ganhe estrelas e desbloqueie os níveis Aprendiz, Jovem e Mestre. Tudo roda no seu navegador.">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-screen="start">
+  <div id="bg" aria-hidden="true"><div class="bg-sky"></div><div class="bg-stars"></div><div class="bg-sun"></div><div class="bg-grid"></div><div class="bg-crt"></div></div>
   <!-- 1 · câmera -->
   <section id="screen-start" class="screen active arcade">
-    <div class="bg-sky"></div><div class="bg-stars"></div><div class="bg-sun"></div><div class="bg-grid"></div><div class="bg-crt"></div>
     <div class="hiscore" aria-live="polite">
       <span>RANK <b id="hs-rank">NOVO JOGADOR</b></span>
       <span>XP <b id="hs-xp">000000</b></span>
@@ -39,7 +39,7 @@
       <div class="rankline"><b id="rankname">🌱 Novato</b><span id="xptext">0 / 100 XP</span></div>
       <div class="xpbar"><span id="xpfill"></span></div>
     </div>
-    <h2>Escolha seu nível</h2>
+    <h2>ESCOLHA SEU NÍVEL</h2>
     <p class="lead" id="menu-hint">Aponte o indicador para um cartão e segure por um instante. Ou use o mouse.</p>
     <div class="levels">
       <article class="level" data-level="aprendiz" tabindex="0">
