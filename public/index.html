@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Jokenpo — jogue com a mão</title>
+  <meta name="description" content="Pedra, papel e tesoura contra o computador usando a webcam. Três níveis: Aprendiz, Jovem e Mestre. Tudo roda no seu navegador.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 1 · câmera -->
+  <section id="screen-start" class="screen active">
+    <h1>✊ ✋ ✌️</h1>
+    <h2>Jokenpo</h2>
+    <p class="lead">Pedra, papel e tesoura contra o computador, usando só a sua mão.</p>
+    <button id="start" class="primary">Ativar câmera e jogar</button>
+    <p id="msg" role="status">O navegador vai pedir permissão para usar a câmera. O vídeo é processado localmente e nunca é enviado a servidor.</p>
+    <button id="nocam" class="link">Continuar sem câmera (mouse e teclado)</button>
+  </section>
+
+  <!-- 2 · menu de níveis -->
+  <section id="screen-menu" class="screen">
+    <h2>Escolha seu nível</h2>
+    <p class="lead" id="menu-hint">Aponte o indicador para um cartão e segure por um instante. Ou use o mouse.</p>
+    <div class="levels">
+      <article class="level" data-level="aprendiz" tabindex="0">
+        <div class="icon">🌱</div><h3>Aprendiz</h3>
+        <p>O computador joga aleatório. Contagem lenta: dá tempo de respirar.</p>
+        <div class="dwell"><span></span></div>
+      </article>
+      <article class="level" data-level="jovem" tabindex="0">
+        <div class="icon">⚔️</div><h3>Jovem</h3>
+        <p>Ele começa a notar qual jogada você mais repete. Contagem mais rápida.</p>
+        <div class="dwell"><span></span></div>
+      </article>
+      <article class="level" data-level="mestre" tabindex="0">
+        <div class="icon">🐉</div><h3>Mestre</h3>
+        <p>Lê padrões de sequência e contra-ataca. Contagem relâmpago. Boa sorte.</p>
+        <div class="dwell"><span></span></div>
+      </article>
+    </div>
+  </section>
+
+  <!-- 3 · jogo -->
+  <section id="screen-game" class="screen">
+    <header class="gamebar">
+      <div id="levelname">🌱 Aprendiz</div>
+      <button id="exit" class="small">Sair (👍)</button>
+    </header>
+
+    <div class="scoreboard" aria-label="Placar">
+      <div class="score you"><span id="sw">0</span><label>Você</label></div>
+      <div class="score draw"><span id="sd">0</span><label>Empates</label></div>
+      <div class="score cpu"><span id="sl">0</span><label>Computador</label></div>
+    </div>
+    <div class="meta">Rodada <b id="round">0</b> · Sequência <b id="streak">0</b> · Recorde <b id="best">0</b></div>
+
+    <div class="arena">
+      <div class="side" id="youBox"><div class="hand" id="youHand">❔</div><label>Você</label></div>
+      <div class="center"><div id="count">Prepare-se…</div></div>
+      <div class="side" id="cpuBox"><div class="hand" id="cpuHand">❔</div><label>Computador</label></div>
+    </div>
+
+    <div id="result" class="result">&nbsp;</div>
+    <div class="history" id="history"></div>
+
+    <div class="exithint">
+      <div>👍 Faça o sinal de <b>joia</b> por 1 segundo para sair</div>
+      <div class="exitbar"><span id="exitbar"></span></div>
+    </div>
+  </section>
+
+  <aside id="panel" hidden>
+    <div class="status" id="status">—</div>
+    <div class="video-wrap">
+      <video id="video" playsinline muted></video>
+      <canvas id="overlay" width="640" height="480"></canvas>
+    </div>
+    <div class="detected">Detectado: <b id="detected">—</b></div>
+    <table id="legend"></table>
+  </aside>
+
+  <div id="cursor" hidden></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

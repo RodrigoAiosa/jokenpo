@@ -1,0 +1,11 @@
+{
+  "name": "jokenpo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Pedra, papel e tesoura contra o computador, jogado com a mão pela webcam",
+  "scripts": {
+    "build": "node -e \"require('fs').accessSync('public/index.html'); console.log('site estatico em public/')\"",
+    "test": "node tests/rps.test.mjs"
+  }
+}
