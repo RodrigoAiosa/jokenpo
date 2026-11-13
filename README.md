@@ -13,7 +13,7 @@ Roda no navegador (MediaPipe) e é publicado no Vercel; o vídeo é processado l
 | ⚔️ **Jovem** | percebe qual jogada você mais repete e a contra-ataca (50 % das vezes) | 0,7 s |
 | 🐉 **Mestre** | lê padrões de sequência (suas últimas jogadas e o resultado anterior) e contra-ataca (85 %) | 0,55 s |
 
-3. **Jogue:** a tela conta *PEDRA… PAPEL… TESOURA… JÁ!* e você mostra a mão quando aparecer **JÁ!**
+3. **Jogue uma partida:** a tela conta *PEDRA… PAPEL… TESOURA… JÁ!* e você mostra a mão quando aparecer **JÁ!** As partidas são **melhor de 5**: vence quem fizer 3 rodadas (empates não contam).
 
 | Gesto | Jogada |
 |---|---|
@@ -22,7 +22,16 @@ Roda no navegador (MediaPipe) e é publicado no Vercel; o vídeo é processado l
 | ✌️ indicador + médio | Tesoura |
 | 👍 **joia** por 1 s | **Sair** (volta ao menu) |
 
-O **placar** mostra vitórias, empates e derrotas, a sequência de vitórias e o recorde por nível (salvo no navegador).
+O **placar** mostra vitórias, empates e derrotas da partida, a sequência de vitórias e o recorde por nível.
+
+## Progressão
+- **Estrelas por nível:** ⭐ vencer 3×2 · ⭐⭐ vencer 3×1 · ⭐⭐⭐ vencer 3×0. Fica a melhor de cada nível.
+- **Desbloqueio:** o Aprendiz começa aberto; vencer uma partida abre o Jovem, e vencer no Jovem abre o Mestre. (Há um link *Destravar todos os níveis* no menu.)
+- **XP e títulos:** cada rodada rende XP (níveis mais difíceis valem mais; vitórias seguidas dão bônus). Títulos: 🌱 Novato → 🥋 Praticante → ⚔️ Guerreiro → 🧘 Sensei → 🏯 Samurai.
+- **9 conquistas** 🏆, como *Em chamas* (5 vitórias seguidas), *Virada* (vencer depois de perder por 0×2) e *Lenda* (vencer o Mestre por 3×0).
+- No fim da partida, os botões também se escolhem **apontando e segurando**.
+
+Tudo fica salvo no navegador (`localStorage`); limpar os dados do site zera o progresso.
 
 > **Jogo justo:** o computador escolhe a jogada *antes* da contagem, usando só o histórico das rodadas anteriores. Ele nunca olha a sua mão da rodada atual. Contra um jogador realmente aleatório, nenhum nível tem vantagem.
 
@@ -33,17 +42,17 @@ Importe o repositório em [vercel.com/new](https://vercel.com/new) — sem confi
 
 > Se o site der **404** logo após o deploy, abra *Project → Settings → Build and Deployment* e deixe *Framework Preset*, *Build Command*, *Install Command*, *Output Directory* e *Root Directory* **sem overrides**, depois faça *Redeploy*.
 
-Rodar local: `python3 -m http.server -d public` (a câmera funciona em `localhost`).
+Rodar local: `python3 -m http.server -d public` (a câmera funciona em `localhost`). Para depurar mais rápido, `?speed=0.2` na URL acelera todas as temporizações.
 
 ## Testes
 ```bash
-npm test      # regras, classificador de gestos e IA dos 3 níveis (Node, sem dependências)
+npm test      # regras, gestos, IA dos 3 níveis e progressão (Node, sem dependências)
 ```
 
 ## Estrutura
 ```
-public/  index.html  style.css  app.js  gestures.js  cpu.js  engine.js
+public/  index.html  style.css  app.js  gestures.js  cpu.js  progress.js  engine.js
 api/     levels.py          → função Python (Vercel)
-tests/   rps.test.mjs
+tests/   rps.test.mjs  progress.test.mjs
 ```
 `engine.js` (cursor por apontar/pinçar) vem do projeto [HandMouse](https://github.com/RodrigoAiosa/HandMouse).

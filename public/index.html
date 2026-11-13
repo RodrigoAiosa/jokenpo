@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Jokenpo — jogue com a mão</title>
-  <meta name="description" content="Pedra, papel e tesoura contra o computador usando a webcam. Três níveis: Aprendiz, Jovem e Mestre. Tudo roda no seu navegador.">
+  <meta name="description" content="Pedra, papel e tesoura contra o computador usando a webcam. Vença partidas, ganhe estrelas e desbloqueie os níveis Aprendiz, Jovem e Mestre. Tudo roda no seu navegador.">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -20,24 +20,36 @@
 
   <!-- 2 · menu de níveis -->
   <section id="screen-menu" class="screen">
+    <div class="rank">
+      <div class="rankline"><b id="rankname">🌱 Novato</b><span id="xptext">0 / 100 XP</span></div>
+      <div class="xpbar"><span id="xpfill"></span></div>
+    </div>
     <h2>Escolha seu nível</h2>
     <p class="lead" id="menu-hint">Aponte o indicador para um cartão e segure por um instante. Ou use o mouse.</p>
     <div class="levels">
       <article class="level" data-level="aprendiz" tabindex="0">
         <div class="icon">🌱</div><h3>Aprendiz</h3>
         <p>O computador joga aleatório. Contagem lenta: dá tempo de respirar.</p>
+        <div class="stars">☆☆☆</div>
         <div class="dwell"><span></span></div>
       </article>
       <article class="level" data-level="jovem" tabindex="0">
         <div class="icon">⚔️</div><h3>Jovem</h3>
         <p>Ele começa a notar qual jogada você mais repete. Contagem mais rápida.</p>
+        <div class="stars">☆☆☆</div>
         <div class="dwell"><span></span></div>
       </article>
       <article class="level" data-level="mestre" tabindex="0">
         <div class="icon">🐉</div><h3>Mestre</h3>
         <p>Lê padrões de sequência e contra-ataca. Contagem relâmpago. Boa sorte.</p>
+        <div class="stars">☆☆☆</div>
         <div class="dwell"><span></span></div>
       </article>
+    </div>
+    <p class="rule">Partidas melhor de 5: vence quem fizer 3 rodadas. ⭐ 3×2 · ⭐⭐ 3×1 · ⭐⭐⭐ 3×0. Vença para liberar o próximo nível.</p>
+    <div class="menubtns">
+      <button class="dwellable" data-act="ach">🏆 Conquistas <b id="achcount">0/9</b><span class="dwell"><span></span></span></button>
+      <button id="unlockall" class="link" data-act="unlockall">Destravar todos os níveis</button>
     </div>
   </section>
 
@@ -45,7 +57,7 @@
   <section id="screen-game" class="screen">
     <header class="gamebar">
       <div id="levelname">🌱 Aprendiz</div>
-      <button id="exit" class="small">Sair (👍)</button>
+      <button class="small" data-act="menu">Sair (👍)</button>
     </header>
 
     <div class="scoreboard" aria-label="Placar">
@@ -53,7 +65,7 @@
       <div class="score draw"><span id="sd">0</span><label>Empates</label></div>
       <div class="score cpu"><span id="sl">0</span><label>Computador</label></div>
     </div>
-    <div class="meta">Rodada <b id="round">0</b> · Sequência <b id="streak">0</b> · Recorde <b id="best">0</b></div>
+    <div class="meta">Melhor de 5 · primeiro a <b>3</b> · Rodada <b id="round">0</b> · Sequência <b id="streak">0</b> · Recorde <b id="best">0</b></div>
 
     <div class="arena">
       <div class="side" id="youBox"><div class="hand" id="youHand">❔</div><label>Você</label></div>
@@ -69,6 +81,36 @@
       <div class="exitbar"><span id="exitbar"></span></div>
     </div>
   </section>
+
+  <!-- fim de partida -->
+  <div id="end" class="overlay" hidden>
+    <div class="modal">
+      <h2 id="endtitle"></h2>
+      <div id="endscore" class="bigscore"></div>
+      <div id="endstars" class="stars big"></div>
+      <div id="endxp" class="endline"></div>
+      <div id="endnew" class="endnew"></div>
+      <div class="actions">
+        <button class="dwellable" data-act="retry">🔁 Jogar de novo<span class="dwell"><span></span></span></button>
+        <button class="dwellable" id="nextbtn" data-act="next">➡️ Próximo nível<span class="dwell"><span></span></span></button>
+        <button class="dwellable" data-act="menu">📋 Menu<span class="dwell"><span></span></span></button>
+      </div>
+      <p class="hint">Aponte e segure sobre um botão · 👍 ou Esc volta ao menu</p>
+    </div>
+  </div>
+
+  <!-- conquistas -->
+  <div id="ach" class="overlay" hidden>
+    <div class="modal wide">
+      <h2>🏆 Conquistas</h2>
+      <ul id="achlist"></ul>
+      <div class="actions">
+        <button class="dwellable" data-act="close">Fechar<span class="dwell"><span></span></span></button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" role="status" aria-live="polite"></div>
 
   <aside id="panel" hidden>
     <div class="status" id="status">—</div>
